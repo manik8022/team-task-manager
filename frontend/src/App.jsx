@@ -260,8 +260,23 @@ function App() {
         <div>
 
           <h2>
-            {role.toUpperCase()} Dashboard
+            {role === "admin"
+              ? "Admin Dashboard"
+              : "Member Dashboard"}
           </h2>
+
+          <p
+            style={{
+              marginBottom: "20px",
+              color: "#6b7280"
+            }}
+          >
+
+            {role === "admin"
+              ? "Manage team tasks and assignments."
+              : "Track and update your assigned tasks."}
+
+          </p>
 
           <div className="dashboard-grid">
 
