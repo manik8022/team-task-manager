@@ -226,20 +226,28 @@ function App() {
 
           <h2>{role.toUpperCase()} Dashboard</h2>
 
-          <div className="card">
-            Total Tasks: {dashboard.total_tasks}
-          </div>
+          <div className="dashboard-grid">
 
-          <div className="card">
-            Completed: {dashboard.completed}
-          </div>
+            <div className="stat-card">
+              <h3>Total Tasks</h3>
+              <p>{dashboard.total_tasks}</p>
+            </div>
 
-          <div className="card">
-            Pending: {dashboard.pending}
-          </div>
+            <div className="stat-card">
+              <h3>Completed</h3>
+              <p>{dashboard.completed}</p>
+            </div>
 
-          <div className="card">
-            Overdue: {dashboard.overdue}
+            <div className="stat-card">
+              <h3>Pending</h3>
+              <p>{dashboard.pending}</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Overdue</h3>
+              <p>{dashboard.overdue}</p>
+            </div>
+
           </div>
 
           {role === "admin" && (
@@ -281,15 +289,32 @@ function App() {
           {tasks.map((task) => (
 
             <div
-              className="card"
+              className={`card ${
+                task.status === "Completed"
+                  ? "task-completed"
+                  : "task-pending"
+              }`}
               key={task.id}
             >
+
               <p>
                 <b>Title:</b> {task.title}
               </p>
 
               <p>
-                <b>Status:</b> {task.status}
+                <b>Status:</b>{" "}
+
+                <span
+                  className={`status ${
+                    task.status === "Completed"
+                      ? "completed"
+                      : task.status === "Overdue"
+                      ? "overdue"
+                      : "pending"
+                  }`}
+                >
+                  {task.status}
+                </span>
               </p>
 
               <p>
@@ -312,7 +337,10 @@ function App() {
 
           ))}
 
-          <button onClick={logout}>
+          <button
+            className="logout-btn"
+            onClick={logout}
+          >
             Logout
           </button>
 
