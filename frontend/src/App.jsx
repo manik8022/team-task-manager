@@ -45,13 +45,13 @@ function App() {
 
       setRole(res.data.role);
 
-      alert("Login Successful");
+      await getDashboard(res.data.token);
 
-      getDashboard();
-
-      getTasks();
+      await getTasks(res.data.token);
 
     } catch (error) {
+
+      console.log(error);
 
       alert("Login Failed");
 
@@ -68,16 +68,19 @@ function App() {
 
   };
 
-  const getDashboard = async () => {
+  const getDashboard = async (customToken = null) => {
 
     try {
+
+      const token =
+        customToken ||
+        localStorage.getItem("token");
 
       const res = await axios.get(
         `${BASE_URL}/dashboard`,
         {
           headers: {
-            Authorization:
-              `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -91,16 +94,19 @@ function App() {
     }
   };
 
-  const getTasks = async () => {
+  const getTasks = async (customToken = null) => {
 
     try {
+
+      const token =
+        customToken ||
+        localStorage.getItem("token");
 
       const res = await axios.get(
         `${BASE_URL}/tasks`,
         {
           headers: {
-            Authorization:
-              `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -120,7 +126,10 @@ function App() {
 
       await axios.post(
         `${BASE_URL}/tasks`,
-        newTask,
+        {
+          ...newTask,
+          assigned_to: 1
+        },
         {
           headers: {
             Authorization:
@@ -172,7 +181,10 @@ function App() {
 
   useEffect(() => {
 
-    if(localStorage.getItem("token")) {
+    const token =
+      localStorage.getItem("token");
+
+    if(token) {
 
       setRole(
         localStorage.getItem("role")
@@ -192,7 +204,8 @@ function App() {
 
       {!dashboard ? (
 
-        <>
+        <div className="card">
+
           <input
             type="text"
             placeholder="Username"
@@ -218,7 +231,8 @@ function App() {
           <button onClick={login}>
             Login
           </button>
-        </>
+
+        </div>
 
       ) : (
 
