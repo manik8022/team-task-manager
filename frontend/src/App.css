@@ -44,11 +44,6 @@ h3 {
   margin-top: 20px;
   box-shadow:
     0 4px 20px rgba(0,0,0,0.08);
-  transition: 0.3s;
-}
-
-.card:hover {
-  transform: translateY(-4px);
 }
 
 .dashboard-grid {
@@ -66,16 +61,10 @@ h3 {
   text-align: center;
   box-shadow:
     0 4px 20px rgba(0,0,0,0.08);
-  transition: 0.3s;
-}
-
-.stat-card:hover {
-  transform: scale(1.03);
 }
 
 .stat-card h3 {
   color: #6b7280;
-  margin-bottom: 10px;
 }
 
 .stat-card p {
@@ -92,22 +81,15 @@ input {
   border-radius: 12px;
   border: 1px solid #d1d5db;
   font-size: 16px;
-  outline: none;
-}
-
-input:focus {
-  border: 1px solid #2563eb;
 }
 
 button {
   background: #2563eb;
   color: white;
   border: none;
-  padding: 14px 22px;
-  border-radius: 12px;
-  font-size: 15px;
+  padding: 12px 18px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: 0.3s;
 }
 
 button:hover {
@@ -143,18 +125,6 @@ button:hover {
   background: #ef4444;
 }
 
-.task-completed {
-  border-left: 6px solid #10b981;
-}
-
-.task-pending {
-  border-left: 6px solid #f59e0b;
-}
-
-.task-overdue {
-  border-left: 6px solid #ef4444;
-}
-
 .login-card {
   max-width: 450px;
   margin: auto;
@@ -170,6 +140,32 @@ button:hover {
   animation: spin 1s linear infinite;
   margin: auto;
   margin-bottom: 20px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th {
+  background: #2563eb;
+  color: white;
+  padding: 14px;
+  text-align: left;
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tr:hover {
+  background: #f9fafb;
 }
 
 @keyframes spin {
@@ -197,7 +193,7 @@ button:hover {
     width: 100%;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  table {
+    min-width: 700px;
   }
 }

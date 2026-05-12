@@ -321,58 +321,78 @@ function App() {
             </div>
           )}
 
-          <h3>Tasks</h3>
+          <div className="card">
 
-          {tasks.map((task) => (
+            <h3>Tasks</h3>
 
-            <div
-              className={`card ${
-                task.status === "Completed"
-                  ? "task-completed"
-                  : "task-pending"
-              }`}
-              key={task.id}
-            >
+            <div className="table-wrapper">
 
-              <p>
-                <b>Title:</b> {task.title}
-              </p>
+              <table>
 
-              <p>
-                <b>Status:</b>{" "}
+                <thead>
 
-                <span
-                  className={`status ${
-                    task.status === "Completed"
-                      ? "completed"
-                      : task.status === "Overdue"
-                      ? "overdue"
-                      : "pending"
-                  }`}
-                >
-                  {task.status}
-                </span>
-              </p>
+                  <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Action</th>
+                  </tr>
 
-              <p>
-                <b>Due:</b> {task.due_date}
-              </p>
+                </thead>
 
-              {task.status !== "Completed" && (
+                <tbody>
 
-                <button
-                  onClick={() =>
-                    updateStatus(task.id)
-                  }
-                >
-                  Mark Completed
-                </button>
+                  {tasks.map((task) => (
 
-              )}
+                    <tr key={task.id}>
+
+                      <td>{task.title}</td>
+
+                      <td>
+
+                        <span
+                          className={`status ${
+                            task.status === "Completed"
+                              ? "completed"
+                              : task.status === "Overdue"
+                              ? "overdue"
+                              : "pending"
+                          }`}
+                        >
+                          {task.status}
+                        </span>
+
+                      </td>
+
+                      <td>{task.due_date}</td>
+
+                      <td>
+
+                        {task.status !== "Completed" && (
+
+                          <button
+                            onClick={() =>
+                              updateStatus(task.id)
+                            }
+                          >
+                            Complete
+                          </button>
+
+                        )}
+
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
 
             </div>
 
-          ))}
+          </div>
 
           <button
             className="logout-btn"
