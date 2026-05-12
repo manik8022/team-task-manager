@@ -266,7 +266,7 @@ function App() {
 
           {role === "admin" && (
 
-            <div className="card">
+            <div className="card login-card">
 
               <h3>Create Task</h3>
 
