@@ -16,7 +16,7 @@ function App() {
     try {
 
       const res = await axios.post(
-        "http://127.0.0.1:5000/login",
+        "https://team-task-manager-backend-gp2v.onrender.com/login",
         data
       );
 
@@ -49,7 +49,7 @@ function App() {
     try {
 
       const res = await axios.get(
-        "http://127.0.0.1:5000/dashboard",
+        "https://team-task-manager-backend-gp2v.onrender.com/dashboard",
         {
           headers: {
             Authorization:
