@@ -6,11 +6,12 @@
 
 body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(
-    135deg,
-    #eef2ff,
-    #f8fafc
-  );
+  background: #f3f4f6;
+}
+
+.dark {
+  background: #111827;
+  color: white;
   min-height: 100vh;
 }
 
@@ -20,21 +21,15 @@ body {
   padding: 40px 20px;
 }
 
-h1 {
-  text-align: center;
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 30px;
-  color: #111827;
-  font-size: 42px;
 }
 
-h2 {
-  margin-bottom: 25px;
-  color: #1f2937;
-}
-
-h3 {
-  margin-bottom: 15px;
-  color: #374151;
+h1 {
+  font-size: 40px;
 }
 
 .card {
@@ -44,6 +39,10 @@ h3 {
   margin-top: 20px;
   box-shadow:
     0 4px 20px rgba(0,0,0,0.08);
+}
+
+.dark .card {
+  background: #1f2937;
 }
 
 .dashboard-grid {
@@ -59,18 +58,15 @@ h3 {
   border-radius: 18px;
   padding: 25px;
   text-align: center;
-  box-shadow:
-    0 4px 20px rgba(0,0,0,0.08);
 }
 
-.stat-card h3 {
-  color: #6b7280;
+.dark .stat-card {
+  background: #1f2937;
 }
 
 .stat-card p {
   font-size: 34px;
   font-weight: bold;
-  color: #111827;
 }
 
 input {
@@ -80,7 +76,6 @@ input {
   margin-bottom: 18px;
   border-radius: 12px;
   border: 1px solid #d1d5db;
-  font-size: 16px;
 }
 
 button {
@@ -92,17 +87,9 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background: #1d4ed8;
-}
-
 .logout-btn {
   background: #dc2626;
   margin-top: 25px;
-}
-
-.logout-btn:hover {
-  background: #b91c1c;
 }
 
 .status {
@@ -164,8 +151,8 @@ td {
   border-bottom: 1px solid #e5e7eb;
 }
 
-tr:hover {
-  background: #f9fafb;
+.dark td {
+  border-bottom: 1px solid #374151;
 }
 
 @keyframes spin {
@@ -181,16 +168,17 @@ tr:hover {
 
 @media screen and (max-width: 768px) {
 
+  .topbar {
+    flex-direction: column;
+    gap: 20px;
+  }
+
   h1 {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .container {
     padding: 20px;
-  }
-
-  button {
-    width: 100%;
   }
 
   table {

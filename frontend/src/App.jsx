@@ -17,6 +17,8 @@ function App() {
 
   const [loading, setLoading] = useState(false);
 
+  const [darkMode, setDarkMode] = useState(false);
+
   const [newTask, setNewTask] = useState({
     title: "",
     due_date: "",
@@ -207,218 +209,235 @@ function App() {
   }, []);
 
   return (
-    <div className="container">
+    <div className={darkMode ? "dark" : ""}>
 
-      <h1>Team Task Manager</h1>
+      <div className="container">
 
-      {loading ? (
+        <div className="topbar">
 
-        <div className="card login-card">
+          <h1>Team Task Manager</h1>
 
-          <div className="loader"></div>
-
-          <h3 style={{textAlign:"center"}}>
-            Loading tasks...
-          </h3>
-
-        </div>
-
-      ) : !dashboard ? (
-
-        <div className="card login-card">
-
-          <input
-            type="text"
-            placeholder="Username"
-            onChange={(e) =>
-              setData({
-                ...data,
-                username: e.target.value
-              })
+          <button
+            onClick={() =>
+              setDarkMode(!darkMode)
             }
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            onChange={(e) =>
-              setData({
-                ...data,
-                password: e.target.value
-              })
-            }
-          />
-
-          <button onClick={login}>
-            Login
+          >
+            {darkMode
+              ? "Light Mode"
+              : "Dark Mode"}
           </button>
 
         </div>
 
-      ) : (
+        {loading ? (
 
-        <div>
+          <div className="card login-card">
 
-          <h2>
-            {role === "admin"
-              ? "Admin Dashboard"
-              : "Member Dashboard"}
-          </h2>
+            <div className="loader"></div>
 
-          <p
-            style={{
-              marginBottom: "20px",
-              color: "#6b7280"
-            }}
-          >
-
-            {role === "admin"
-              ? "Manage team tasks and assignments."
-              : "Track and update your assigned tasks."}
-
-          </p>
-
-          <div className="dashboard-grid">
-
-            <div className="stat-card">
-              <h3>Total Tasks</h3>
-              <p>{dashboard.total_tasks}</p>
-            </div>
-
-            <div className="stat-card">
-              <h3>Completed</h3>
-              <p>{dashboard.completed}</p>
-            </div>
-
-            <div className="stat-card">
-              <h3>Pending</h3>
-              <p>{dashboard.pending}</p>
-            </div>
-
-            <div className="stat-card">
-              <h3>Overdue</h3>
-              <p>{dashboard.overdue}</p>
-            </div>
+            <h3 style={{textAlign:"center"}}>
+              Loading tasks...
+            </h3>
 
           </div>
 
-          {role === "admin" && (
+        ) : !dashboard ? (
+
+          <div className="card login-card">
+
+            <input
+              type="text"
+              placeholder="Username"
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  username: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  password: e.target.value
+                })
+              }
+            />
+
+            <button onClick={login}>
+              Login
+            </button>
+
+          </div>
+
+        ) : (
+
+          <div>
+
+            <h2>
+              {role === "admin"
+                ? "Admin Dashboard"
+                : "Member Dashboard"}
+            </h2>
+
+            <p
+              style={{
+                marginBottom: "20px"
+              }}
+            >
+
+              {role === "admin"
+                ? "Manage team tasks and assignments."
+                : "Track and update your assigned tasks."}
+
+            </p>
+
+            <div className="dashboard-grid">
+
+              <div className="stat-card">
+                <h3>Total Tasks</h3>
+                <p>{dashboard.total_tasks}</p>
+              </div>
+
+              <div className="stat-card">
+                <h3>Completed</h3>
+                <p>{dashboard.completed}</p>
+              </div>
+
+              <div className="stat-card">
+                <h3>Pending</h3>
+                <p>{dashboard.pending}</p>
+              </div>
+
+              <div className="stat-card">
+                <h3>Overdue</h3>
+                <p>{dashboard.overdue}</p>
+              </div>
+
+            </div>
+
+            {role === "admin" && (
+
+              <div className="card">
+
+                <h3>Create Task</h3>
+
+                <input
+                  type="text"
+                  placeholder="Task Title"
+                  onChange={(e) =>
+                    setNewTask({
+                      ...newTask,
+                      title: e.target.value
+                    })
+                  }
+                />
+
+                <input
+                  type="date"
+                  onChange={(e) =>
+                    setNewTask({
+                      ...newTask,
+                      due_date: e.target.value
+                    })
+                  }
+                />
+
+                <button onClick={createTask}>
+                  Create Task
+                </button>
+
+              </div>
+            )}
 
             <div className="card">
 
-              <h3>Create Task</h3>
+              <h3>Tasks</h3>
 
-              <input
-                type="text"
-                placeholder="Task Title"
-                onChange={(e) =>
-                  setNewTask({
-                    ...newTask,
-                    title: e.target.value
-                  })
-                }
-              />
+              <div className="table-wrapper">
 
-              <input
-                type="date"
-                onChange={(e) =>
-                  setNewTask({
-                    ...newTask,
-                    due_date: e.target.value
-                  })
-                }
-              />
+                <table>
 
-              <button onClick={createTask}>
-                Create Task
-              </button>
+                  <thead>
 
-            </div>
-          )}
-
-          <div className="card">
-
-            <h3>Tasks</h3>
-
-            <div className="table-wrapper">
-
-              <table>
-
-                <thead>
-
-                  <tr>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Due Date</th>
-                    <th>Action</th>
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {tasks.map((task) => (
-
-                    <tr key={task.id}>
-
-                      <td>{task.title}</td>
-
-                      <td>
-
-                        <span
-                          className={`status ${
-                            task.status === "Completed"
-                              ? "completed"
-                              : task.status === "Overdue"
-                              ? "overdue"
-                              : "pending"
-                          }`}
-                        >
-                          {task.status}
-                        </span>
-
-                      </td>
-
-                      <td>{task.due_date}</td>
-
-                      <td>
-
-                        {task.status !== "Completed" && (
-
-                          <button
-                            onClick={() =>
-                              updateStatus(task.id)
-                            }
-                          >
-                            Complete
-                          </button>
-
-                        )}
-
-                      </td>
-
+                    <tr>
+                      <th>Title</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Action</th>
                     </tr>
 
-                  ))}
+                  </thead>
 
-                </tbody>
+                  <tbody>
 
-              </table>
+                    {tasks.map((task) => (
+
+                      <tr key={task.id}>
+
+                        <td>{task.title}</td>
+
+                        <td>
+
+                          <span
+                            className={`status ${
+                              task.status === "Completed"
+                                ? "completed"
+                                : task.status === "Overdue"
+                                ? "overdue"
+                                : "pending"
+                            }`}
+                          >
+                            {task.status}
+                          </span>
+
+                        </td>
+
+                        <td>{task.due_date}</td>
+
+                        <td>
+
+                          {task.status !== "Completed" && (
+
+                            <button
+                              onClick={() =>
+                                updateStatus(task.id)
+                              }
+                            >
+                              Complete
+                            </button>
+
+                          )}
+
+                        </td>
+
+                      </tr>
+
+                    ))}
+
+                  </tbody>
+
+                </table>
+
+              </div>
 
             </div>
+
+            <button
+              className="logout-btn"
+              onClick={logout}
+            >
+              Logout
+            </button>
 
           </div>
 
-          <button
-            className="logout-btn"
-            onClick={logout}
-          >
-            Logout
-          </button>
+        )}
 
-        </div>
-
-      )}
+      </div>
 
     </div>
   );
