@@ -1,395 +1,430 @@
-import React, { useState } from "react";
-import {
-  LayoutDashboard,
-  ClipboardList,
-  User,
-  LogOut,
-  Search,
-  Moon,
-  Sun,
-  CheckCircle2,
-  Clock3,
-  AlertTriangle,
-  ListTodo
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import "./App.css";
 
-export default function App() {
+function App() {
+
+  const [data, setData] = useState({
+    username: "",
+    password: ""
+  });
+
+  const [dashboard, setDashboard] = useState(null);
+
+  const [tasks, setTasks] = useState([]);
+
+  const [role, setRole] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   const [darkMode, setDarkMode] = useState(false);
 
-  const tasks = [
-    {
-      id: 1,
-      title: "Design Homepage",
-      assigned: "John Doe",
-      status: "Completed",
-      due: "20 May 2024"
-    },
-    {
-      id: 2,
-      title: "Build API Endpoints",
-      assigned: "Jane Smith",
-      status: "Pending",
-      due: "25 May 2024"
-    },
-    {
-      id: 3,
-      title: "Fix UI Bugs",
-      assigned: "Mike Johnson",
-      status: "Overdue",
-      due: "15 May 2024"
-    },
-    {
-      id: 4,
-      title: "Write Documentation",
-      assigned: "Emily Davis",
-      status: "Pending",
-      due: "30 May 2024"
+  const [newTask, setNewTask] = useState({
+    title: "",
+    due_date: ""
+  });
+
+  const BASE_URL =
+    "https://team-task-manager-backend-gp2v.onrender.com";
+
+  const login = async () => {
+
+    try {
+
+      setLoading(true);
+
+      const res = await axios.post(
+        `${BASE_URL}/login`,
+        data
+      );
+
+      localStorage.setItem(
+        "token",
+        res.data.token
+      );
+
+      localStorage.setItem(
+        "role",
+        res.data.role
+      );
+
+      setRole(res.data.role);
+
+      await getDashboard(
+        res.data.token
+      );
+
+      await getTasks(
+        res.data.token
+      );
+
+      setLoading(false);
+
+    } catch (error) {
+
+      setLoading(false);
+
+      alert("Login Failed");
     }
-  ];
-
-  const getStatusClass = (status) => {
-
-    if(status === "Completed")
-      return "status completed";
-
-    if(status === "Pending")
-      return "status pending";
-
-    return "status overdue";
   };
+
+  const logout = () => {
+
+    localStorage.clear();
+
+    setDashboard(null);
+
+    setTasks([]);
+  };
+
+  const getDashboard = async (
+    customToken = null
+  ) => {
+
+    try {
+
+      const token =
+        customToken ||
+        localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${BASE_URL}/dashboard`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      );
+
+      setDashboard(res.data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const getTasks = async (
+    customToken = null
+  ) => {
+
+    try {
+
+      const token =
+        customToken ||
+        localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${BASE_URL}/tasks`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      );
+
+      setTasks(res.data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const createTask = async () => {
+
+    try {
+
+      await axios.post(
+        `${BASE_URL}/tasks`,
+        newTask,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${localStorage.getItem("token")}`
+          }
+        }
+      );
+
+      getTasks();
+
+      getDashboard();
+
+      alert("Task Created");
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const updateStatus = async (id) => {
+
+    try {
+
+      await axios.put(
+        `${BASE_URL}/tasks/${id}`,
+        {},
+        {
+          headers: {
+            Authorization:
+              `Bearer ${localStorage.getItem("token")}`
+          }
+        }
+      );
+
+      getTasks();
+
+      getDashboard();
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+
+    const token =
+      localStorage.getItem("token");
+
+    if(token) {
+
+      setRole(
+        localStorage.getItem("role")
+      );
+
+      getDashboard();
+
+      getTasks();
+    }
+
+  }, []);
 
   return (
 
-    <div className={darkMode ? "app dark" : "app"}>
+    <div className={darkMode ? "dark" : ""}>
 
-      {/* SIDEBAR */}
+      <div className="container">
 
-      <aside className="sidebar">
+        <div className="topbar">
 
-        <div>
+          <h1>Team Task Manager</h1>
 
-          <div className="logo">
+          <button
+            onClick={() =>
+              setDarkMode(!darkMode)
+            }
+          >
+            {darkMode
+              ? "Light Mode"
+              : "Dark Mode"}
+          </button>
 
-            <div className="logo-icon">
-              ✓
-            </div>
+        </div>
 
-            <h2>Team Task Manager</h2>
+        {loading ? (
+
+          <div className="card login-card">
+
+            <div className="loader"></div>
+
+            <h3>
+              Loading...
+            </h3>
 
           </div>
 
-          <nav className="menu">
+        ) : !dashboard ? (
 
-            <div className="menu-item active">
-              <LayoutDashboard size={20}/>
-              Dashboard
-            </div>
+          <div className="card login-card">
 
-            <div className="menu-item">
-              <ClipboardList size={20}/>
-              Tasks
-            </div>
+            <input
+              type="text"
+              placeholder="Username"
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  username: e.target.value
+                })
+              }
+            />
 
-            <div className="menu-item">
-              <User size={20}/>
-              Profile
-            </div>
+            <input
+              type="password"
+              placeholder="Password"
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  password: e.target.value
+                })
+              }
+            />
 
-          </nav>
+            <button onClick={login}>
+              Login
+            </button>
 
-        </div>
+          </div>
 
-        <div className="logout">
-          <LogOut size={20}/>
-          Logout
-        </div>
-
-      </aside>
-
-      {/* MAIN */}
-
-      <main className="main">
-
-        {/* HEADER */}
-
-        <div className="header">
+        ) : (
 
           <div>
 
-            <h1>
-              Welcome back, Admin! 👋
-            </h1>
+            <h2>
+              {role === "admin"
+                ? "Admin Dashboard"
+                : "Member Dashboard"}
+            </h2>
 
-            <p>
-              Here's what's happening with your tasks today.
-            </p>
+            <div className="dashboard-grid">
 
-          </div>
-
-          <div className="header-right">
-
-            <button
-              className="theme-btn"
-              onClick={() =>
-                setDarkMode(!darkMode)
-              }
-            >
-
-              {darkMode
-                ? <Sun size={18}/>
-                : <Moon size={18}/>
-              }
-
-              {darkMode
-                ? "Light Mode"
-                : "Dark Mode"}
-
-            </button>
-
-            <div className="profile">
-
-              <div className="avatar">
-                A
+              <div className="stat-card">
+                <h3>Total Tasks</h3>
+                <p>{dashboard.total_tasks}</p>
               </div>
 
-              <span>Admin</span>
+              <div className="stat-card">
+                <h3>Completed</h3>
+                <p>{dashboard.completed}</p>
+              </div>
+
+              <div className="stat-card">
+                <h3>Pending</h3>
+                <p>{dashboard.pending}</p>
+              </div>
+
+              <div className="stat-card">
+                <h3>Overdue</h3>
+                <p>{dashboard.overdue}</p>
+              </div>
 
             </div>
 
-          </div>
+            {role === "admin" && (
 
-        </div>
+              <div className="card">
 
-        {/* STATS */}
-
-        <div className="stats-grid">
-
-          <div className="stat-card">
-
-            <div className="icon blue">
-              <ListTodo/>
-            </div>
-
-            <div>
-
-              <h3>Total Tasks</h3>
-
-              <h2>12</h2>
-
-              <p>All assigned tasks</p>
-
-            </div>
-
-          </div>
-
-          <div className="stat-card">
-
-            <div className="icon green">
-              <CheckCircle2/>
-            </div>
-
-            <div>
-
-              <h3>Completed</h3>
-
-              <h2>5</h2>
-
-              <p>Tasks completed</p>
-
-            </div>
-
-          </div>
-
-          <div className="stat-card">
-
-            <div className="icon yellow">
-              <Clock3/>
-            </div>
-
-            <div>
-
-              <h3>Pending</h3>
-
-              <h2>4</h2>
-
-              <p>Tasks in progress</p>
-
-            </div>
-
-          </div>
-
-          <div className="stat-card">
-
-            <div className="icon red">
-              <AlertTriangle/>
-            </div>
-
-            <div>
-
-              <h3>Overdue</h3>
-
-              <h2>3</h2>
-
-              <p>Tasks past due date</p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* CONTENT */}
-
-        <div className="content-grid">
-
-          {/* CREATE TASK */}
-
-          <div className="card">
-
-            <h2>Create Task</h2>
-
-            <div className="form-group">
-
-              <label>Task Title</label>
-
-              <input
-                type="text"
-                placeholder="Enter task title"
-              />
-
-            </div>
-
-            <div className="form-group">
-
-              <label>Due Date</label>
-
-              <input type="date"/>
-
-            </div>
-
-            <div className="form-group">
-
-              <label>Assign To</label>
-
-              <select>
-
-                <option>
-                  Select member
-                </option>
-
-                <option>
-                  John Doe
-                </option>
-
-                <option>
-                  Jane Smith
-                </option>
-
-              </select>
-
-            </div>
-
-            <button className="create-btn">
-              Create Task
-            </button>
-
-          </div>
-
-          {/* TABLE */}
-
-          <div className="card">
-
-            <div className="table-top">
-
-              <h2>Tasks</h2>
-
-              <div className="search">
-
-                <Search size={18}/>
+                <h3>Create Task</h3>
 
                 <input
                   type="text"
-                  placeholder="Search tasks..."
+                  placeholder="Task Title"
+                  onChange={(e) =>
+                    setNewTask({
+                      ...newTask,
+                      title: e.target.value
+                    })
+                  }
                 />
+
+                <input
+                  type="date"
+                  onChange={(e) =>
+                    setNewTask({
+                      ...newTask,
+                      due_date: e.target.value
+                    })
+                  }
+                />
+
+                <button onClick={createTask}>
+                  Create Task
+                </button>
+
+              </div>
+            )}
+
+            <div className="card">
+
+              <h3>Tasks</h3>
+
+              <div className="table-wrapper">
+
+                <table>
+
+                  <thead>
+
+                    <tr>
+                      <th>Title</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Action</th>
+                    </tr>
+
+                  </thead>
+
+                  <tbody>
+
+                    {tasks.map((task) => (
+
+                      <tr key={task.id}>
+
+                        <td>{task.title}</td>
+
+                        <td>
+
+                          <span
+                            className={`status ${
+                              task.status === "Completed"
+                                ? "completed"
+                                : task.status === "Overdue"
+                                ? "overdue"
+                                : "pending"
+                            }`}
+                          >
+                            {task.status}
+                          </span>
+
+                        </td>
+
+                        <td>{task.due_date}</td>
+
+                        <td>
+
+                          {task.status !== "Completed" && (
+
+                            <button
+                              onClick={() =>
+                                updateStatus(task.id)
+                              }
+                            >
+                              Complete
+                            </button>
+
+                          )}
+
+                        </td>
+
+                      </tr>
+
+                    ))}
+
+                  </tbody>
+
+                </table>
 
               </div>
 
             </div>
 
-            <div className="table-wrapper">
-
-              <table>
-
-                <thead>
-
-                  <tr>
-                    <th>Title</th>
-                    <th>Assigned To</th>
-                    <th>Status</th>
-                    <th>Due Date</th>
-                    <th>Action</th>
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {tasks.map((task) => (
-
-                    <tr key={task.id}>
-
-                      <td>{task.title}</td>
-
-                      <td>{task.assigned}</td>
-
-                      <td>
-
-                        <span
-                          className={
-                            getStatusClass(
-                              task.status
-                            )
-                          }
-                        >
-                          {task.status}
-                        </span>
-
-                      </td>
-
-                      <td>{task.due}</td>
-
-                      <td>
-
-                        {task.status !==
-                          "Completed" && (
-
-                          <button
-                            className="complete-btn"
-                          >
-                            Complete
-                          </button>
-
-                        )}
-
-                      </td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
+            <button
+              className="logout-btn"
+              onClick={logout}
+            >
+              Logout
+            </button>
 
           </div>
 
-        </div>
+        )}
 
-      </main>
+      </div>
 
     </div>
   );
 }
+
+export default App;
