@@ -15,6 +15,8 @@ function App() {
 
   const [role, setRole] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   const [newTask, setNewTask] = useState({
     title: "",
     due_date: "",
@@ -27,6 +29,8 @@ function App() {
   const login = async () => {
 
     try {
+
+      setLoading(true);
 
       const res = await axios.post(
         `${BASE_URL}/login`,
@@ -45,16 +49,23 @@ function App() {
 
       setRole(res.data.role);
 
-      await getDashboard(res.data.token);
+      await getDashboard(
+        res.data.token
+      );
 
-      await getTasks(res.data.token);
+      await getTasks(
+        res.data.token
+      );
+
+      setLoading(false);
 
     } catch (error) {
 
       console.log(error);
 
-      alert("Login Failed");
+      setLoading(false);
 
+      alert("Login Failed");
     }
   };
 
@@ -65,10 +76,11 @@ function App() {
     setDashboard(null);
 
     setTasks([]);
-
   };
 
-  const getDashboard = async (customToken = null) => {
+  const getDashboard = async (
+    customToken = null
+  ) => {
 
     try {
 
@@ -80,7 +92,8 @@ function App() {
         `${BASE_URL}/dashboard`,
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization:
+              `Bearer ${token}`
           }
         }
       );
@@ -90,11 +103,12 @@ function App() {
     } catch (error) {
 
       console.log(error);
-
     }
   };
 
-  const getTasks = async (customToken = null) => {
+  const getTasks = async (
+    customToken = null
+  ) => {
 
     try {
 
@@ -106,7 +120,8 @@ function App() {
         `${BASE_URL}/tasks`,
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization:
+              `Bearer ${token}`
           }
         }
       );
@@ -116,7 +131,6 @@ function App() {
     } catch (error) {
 
       console.log(error);
-
     }
   };
 
@@ -126,10 +140,7 @@ function App() {
 
       await axios.post(
         `${BASE_URL}/tasks`,
-        {
-          ...newTask,
-          assigned_to: 1
-        },
+        newTask,
         {
           headers: {
             Authorization:
@@ -147,7 +158,6 @@ function App() {
     } catch (error) {
 
       console.log(error);
-
     }
   };
 
@@ -175,7 +185,6 @@ function App() {
     } catch (error) {
 
       console.log(error);
-
     }
   };
 
@@ -202,9 +211,21 @@ function App() {
 
       <h1>Team Task Manager</h1>
 
-      {!dashboard ? (
+      {loading ? (
 
-        <div className="card">
+        <div className="card login-card">
+
+          <div className="loader"></div>
+
+          <h3 style={{textAlign:"center"}}>
+            Loading tasks...
+          </h3>
+
+        </div>
+
+      ) : !dashboard ? (
+
+        <div className="card login-card">
 
           <input
             type="text"
@@ -238,7 +259,9 @@ function App() {
 
         <div>
 
-          <h2>{role.toUpperCase()} Dashboard</h2>
+          <h2>
+            {role.toUpperCase()} Dashboard
+          </h2>
 
           <div className="dashboard-grid">
 
@@ -266,7 +289,7 @@ function App() {
 
           {role === "admin" && (
 
-            <div className="card login-card">
+            <div className="card">
 
               <h3>Create Task</h3>
 

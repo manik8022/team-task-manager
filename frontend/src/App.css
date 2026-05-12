@@ -161,6 +161,28 @@ button:hover {
   margin-top: 80px;
 }
 
+.loader {
+  border: 6px solid #e5e7eb;
+  border-top: 6px solid #2563eb;
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @media screen and (max-width: 768px) {
 
   h1 {
@@ -173,5 +195,9 @@ button:hover {
 
   button {
     width: 100%;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }
