@@ -3,12 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
-    jwt_required,
-    get_jwt_identity
+    jwt_required
 )
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
@@ -24,113 +27,158 @@ jwt = JWTManager(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(200))
-    role = db.Column(db.String(20))
 
-class Project(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    username = db.Column(
+        db.String(100),
+        unique=True
+    )
+
+    password = db.Column(
+        db.String(200)
+    )
+
+    role = db.Column(
+        db.String(20)
+    )
 
 class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    status = db.Column(db.String(50))
-    due_date = db.Column(db.String(50))
-    assigned_to = db.Column(db.Integer)
 
-# ---------------- AUTH ---------------- #
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    title = db.Column(
+        db.String(100)
+    )
+
+    status = db.Column(
+        db.String(50)
+    )
+
+    due_date = db.Column(
+        db.String(50)
+    )
+
+    assigned_to = db.Column(
+        db.Integer
+    )
+
+# ---------------- HOME ---------------- #
+
+@app.route('/')
+def home():
+
+    return jsonify({
+        "message": "Backend Running"
+    })
+
+# ---------------- SIGNUP ---------------- #
 
 @app.route('/signup', methods=['POST'])
 def signup():
 
-    data = request.json
+    try:
 
-    hashed = generate_password_hash(
-        data['password']
-    )
+        data = request.json
 
-    user = User(
-        username=data['username'],
-        password=hashed,
-        role=data['role']
-    )
+        existing = User.query.filter_by(
+            username=data['username']
+        ).first()
 
-    db.session.add(user)
-    db.session.commit()
+        if existing:
 
-    return jsonify({
-        "message": "User created successfully"
-    })
+            return jsonify({
+                "message": "User already exists"
+            }), 400
+
+        hashed_password = generate_password_hash(
+            data['password']
+        )
+
+        user = User(
+            username=data['username'],
+            password=hashed_password,
+            role=data['role']
+        )
+
+        db.session.add(user)
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "User created successfully"
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+# ---------------- LOGIN ---------------- #
 
 @app.route('/login', methods=['POST'])
 def login():
 
-    data = request.json
+    try:
 
-    user = User.query.filter_by(
-        username=data['username']
-    ).first()
+        data = request.json
 
-    if not user:
+        user = User.query.filter_by(
+            username=data['username']
+        ).first()
+
+        if not user:
+
+            return jsonify({
+                "message": "User not found"
+            }), 404
+
+        if check_password_hash(
+            user.password,
+            data['password']
+        ):
+
+            token = create_access_token(
+                identity=str(user.id)
+            )
+
+            return jsonify({
+                "token": token,
+                "role": user.role
+            })
+
         return jsonify({
-            "message": "User not found"
-        }), 404
+            "message": "Invalid password"
+        }), 401
 
-    if check_password_hash(
-        user.password,
-        data['password']
-    ):
-
-        token = create_access_token(
-            identity=str(user.id)
-        )
+    except Exception as e:
 
         return jsonify({
-            "token": token,
-            "role": user.role
-        })
+            "error": str(e)
+        }), 500
 
-    return jsonify({
-        "message": "Invalid password"
-    }), 401
+# ---------------- TASKS ---------------- #
 
-# ---------------- PROJECTS ---------------- #
-
-@app.route('/projects', methods=['POST'])
+@app.route('/tasks', methods=['GET'])
 @jwt_required()
-def create_project():
+def get_tasks():
 
-    data = request.json
-
-    project = Project(
-        name=data['name']
-    )
-
-    db.session.add(project)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Project created successfully"
-    })
-
-@app.route('/projects', methods=['GET'])
-@jwt_required()
-def get_projects():
-
-    projects = Project.query.all()
+    tasks = Task.query.all()
 
     result = []
 
-    for p in projects:
+    for task in tasks:
+
         result.append({
-            "id": p.id,
-            "name": p.name
+            "id": task.id,
+            "title": task.title,
+            "status": task.status,
+            "due_date": task.due_date
         })
 
     return jsonify(result)
-
-# ---------------- TASKS ---------------- #
 
 @app.route('/tasks', methods=['POST'])
 @jwt_required()
@@ -142,34 +190,16 @@ def create_task():
         title=data['title'],
         status="Pending",
         due_date=data['due_date'],
-        assigned_to=data['assigned_to']
+        assigned_to=1
     )
 
     db.session.add(task)
+
     db.session.commit()
 
     return jsonify({
-        "message": "Task created successfully"
+        "message": "Task created"
     })
-
-@app.route('/tasks', methods=['GET'])
-@jwt_required()
-def get_tasks():
-
-    tasks = Task.query.all()
-
-    result = []
-
-    for t in tasks:
-        result.append({
-            "id": t.id,
-            "title": t.title,
-            "status": t.status,
-            "due_date": t.due_date,
-            "assigned_to": t.assigned_to
-        })
-
-    return jsonify(result)
 
 @app.route('/tasks/<int:id>', methods=['PUT'])
 @jwt_required()
@@ -177,14 +207,18 @@ def update_task(id):
 
     task = Task.query.get(id)
 
-    data = request.json
+    if not task:
 
-    task.status = data['status']
+        return jsonify({
+            "message": "Task not found"
+        }), 404
+
+    task.status = "Completed"
 
     db.session.commit()
 
     return jsonify({
-        "message": "Task updated successfully"
+        "message": "Task updated"
     })
 
 # ---------------- DASHBOARD ---------------- #
@@ -209,13 +243,21 @@ def dashboard():
 
     for task in tasks:
 
-        due = datetime.strptime(
-            task.due_date,
-            "%Y-%m-%d"
-        )
+        try:
 
-        if due < datetime.now() and task.status != "Completed":
-            overdue += 1
+            due = datetime.strptime(
+                task.due_date,
+                "%Y-%m-%d"
+            )
+
+            if (
+                due < datetime.now()
+                and task.status != "Completed"
+            ):
+                overdue += 1
+
+        except:
+            pass
 
     return jsonify({
         "total_tasks": total,
@@ -231,8 +273,11 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
+    port = int(
+        os.environ.get("PORT", 5000)
+    )
+
     app.run(
         host="0.0.0.0",
-        port=5000,
-        debug=True
+        port=port
     )
