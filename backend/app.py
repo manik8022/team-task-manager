@@ -46,7 +46,9 @@ def signup():
 
     data = request.json
 
-    hashed = generate_password_hash(data['password'])
+    hashed = generate_password_hash(
+        data['password']
+    )
 
     user = User(
         username=data['username'],
@@ -75,7 +77,10 @@ def login():
             "message": "User not found"
         }), 404
 
-    if check_password_hash(user.password, data['password']):
+    if check_password_hash(
+        user.password,
+        data['password']
+    ):
 
         token = create_access_token(
             identity=str(user.id)
@@ -222,9 +227,12 @@ def dashboard():
 # ---------------- RUN ---------------- #
 
 if __name__ == "__main__":
+
+    with app.app_context():
+        db.create_all()
+
     app.run(
         host="0.0.0.0",
         port=5000,
         debug=True
     )
-    
